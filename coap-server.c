@@ -1746,7 +1746,11 @@ static void hnd_put_data(coap_resource_t *resource, coap_session_t *session COAP
     FILE *file = fopen("received_data.txt", "a"); // Open file for appending
     if (file != NULL) {
       fwrite(data, sizeof(char), size, file); // Write data
+<<<<<<< HEAD
       fwrite("\n", sizeof(char), 1, file); 
+=======
+      fwrite("\n", sizeof(char), 1, file);
+>>>>>>> 99c203e (V1-update data set)
       fclose(file); // Always close the file
       coap_pdu_set_code(response, COAP_RESPONSE_CODE_CHANGED);
     } else {
@@ -1757,6 +1761,53 @@ static void hnd_put_data(coap_resource_t *resource, coap_session_t *session COAP
     // If there was no data in the PUT request, respond with bad request
     coap_pdu_set_code(response, COAP_RESPONSE_CODE_BAD_REQUEST);
   }
+}
+
+static void hnd_get_time(coap_resource_t *resource,
+                   coap_session_t *session,
+                   const coap_pdu_t *request,
+                   const coap_string_t *query,
+                   coap_pdu_t *response) {
+  unsigned char buf[40];
+  size_t len;
+  time_t now;
+  coap_tick_t t;
+  (void)request;
+  coap_pdu_code_t code = coap_pdu_get_code(request);
+  size_t size;
+  const uint8_t *data;
+  coap_str_const_t *ticks = coap_make_str_const("ticks");
+
+  if (my_clock_base) {
+
+    /* calculate current time */
+    coap_ticks(&t);
+    now = my_clock_base + (t / COAP_TICKS_PER_SECOND);
+
+    /* coap_get_data() sets size to 0 on error */
+    (void)coap_get_data(request, &size, &data);
+
+    /* output human-readable time */
+      struct tm *tmp;
+      tmp = gmtime(&now);
+      if (!tmp) {
+        /* If 'now' is not valid */
+        coap_pdu_set_code(response, COAP_RESPONSE_CODE_NOT_FOUND);
+        return;
+      } else {
+        len = snprintf((char *)buf, sizeof(buf), "%" PRIi64, (int64_t)now);
+      }
+    
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_CONTENT);
+    coap_add_data_large_response(resource, session, request, response,
+                                 query, COAP_MEDIATYPE_TEXT_PLAIN, 1, 0,
+                                 len,
+                                 buf, NULL, NULL);
+  } else {
+    /* if my_clock_base was deleted, we pretend to have no such resource */
+    coap_pdu_set_code(response, COAP_RESPONSE_CODE_NOT_FOUND);
+  }
+
 }
 
 static void
@@ -1819,6 +1870,14 @@ init_resources(coap_context_t *ctx) {
 
   r = coap_resource_init(coap_make_str_const("data"), resource_flags);
   coap_register_handler(r, COAP_REQUEST_PUT, hnd_put_data);
+  
+  coap_add_attr(r, coap_make_str_const("ct"), coap_make_str_const("0"), 0);
+  coap_add_attr(r, coap_make_str_const("title"), coap_make_str_const("\"Data\""), 0);
+  
+  coap_add_resource(ctx, r);
+  
+  r = coap_resource_init(coap_make_str_const("realtime"), resource_flags);
+  coap_register_handler(r, COAP_REQUEST_GET, hnd_get_time);
   
   coap_add_attr(r, coap_make_str_const("ct"), coap_make_str_const("0"), 0);
   coap_add_attr(r, coap_make_str_const("title"), coap_make_str_const("\"Data\""), 0);
