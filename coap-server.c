@@ -1746,7 +1746,15 @@ static void hnd_put_data(coap_resource_t *resource, coap_session_t *session COAP
     FILE *file = fopen("received_data.txt", "a"); // Open file for appending
     if (file != NULL) {
       fwrite(data, sizeof(char), size, file); // Write data
+<<<<<<< HEAD
       fwrite("\n", sizeof(char), 1, file);
+=======
+<<<<<<< HEAD
+      fwrite("\n", sizeof(char), 1, file); 
+=======
+      fwrite("\n", sizeof(char), 1, file);
+>>>>>>> 99c203e (V1-update data set)
+>>>>>>> 6c6a540ca348f2d83d18c2772729d750fbe1926c
       fclose(file); // Always close the file
       coap_pdu_set_code(response, COAP_RESPONSE_CODE_CHANGED);
     } else {
