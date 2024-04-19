@@ -1780,7 +1780,7 @@ static void hnd_get_time(coap_resource_t *resource,
 
     /* calculate current time */
     coap_ticks(&t);
-    now = my_clock_base + (t / COAP_TICKS_PER_SECOND);
+    now = my_clock_base + (t / COAP_TICKS_PER_SECOND) +3600; // +3600 here to apapt to UK Summer Time
 
     /* coap_get_data() sets size to 0 on error */
     (void)coap_get_data(request, &size, &data);
