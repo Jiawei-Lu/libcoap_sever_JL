@@ -1747,8 +1747,8 @@ static void hnd_put_data(coap_resource_t *resource, coap_session_t *session COAP
     if (file != NULL) {
       fwrite(data, sizeof(char), size, file); // Write data
       fwrite("\n", sizeof(char), 1, file);
-      fwrite("\n", sizeof(char), 1, file); 
-      fwrite("\n", sizeof(char), 1, file);
+      // fwrite("\n", sizeof(char), 1, file); 
+      // fwrite("\n", sizeof(char), 1, file);
       fclose(file); // Always close the file
       coap_pdu_set_code(response, COAP_RESPONSE_CODE_CHANGED);
     } else {
